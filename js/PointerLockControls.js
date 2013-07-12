@@ -86,7 +86,7 @@
                 if ( canJump === true ){
                     velocity.y = jumpVelocity;
                 }
-                canJump = false;
+                canJump = true;
                 break;
         }
 
