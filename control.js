@@ -1,9 +1,60 @@
 
-function get () {
-    return 5;
+
+function getThetaZYX ( points ) {
+    console.log("Seq:ZYX");
+    /**
+     *
+     *[x1,x2,x3],
+     *[y1,y2,y3],
+     *[z1,z2,z3]
+     *
+     * */
+    var base = [[1,0,0],
+                [0,1,0],
+                [0,0,1]];
+    //var curBase = genBase (points);
+    curBase =  [[0.93296281 , -0.185281410704 , 0.308428215228],
+                [0.24997492 , 0.950296571472 , -0.185281410704],
+                [-0.2588    , 0.24997492     , 0.93296281]];
+    var thetaY = Math.asin( curBase[0][2] );
+    var thetaZ = Math.asin( -curBase[0][1] / (Math.cos(thetaY)) );
+    var thetaX = Math.asin( -curBase[1][2] / (Math.cos(thetaY)) );
+    console.log ( "x3:" + curBase[0][2] + " x2:" + curBase[0][1] + " y2:" + curBase[1][2] );
+    console.log ([thetaX/Math.PI*180, thetaY/Math.PI*180, thetaZ/Math.PI*180]);
 }
 
-function controller (getThetaX, getThetaY, getThetaZ, getA, setPin) {
+function getThetaXYZ ( points ) {
+    console.log("Seq:XYZ");
+    /**
+     *
+     *[x1,x2,x3],
+     *[y1,y2,y3],
+     *[z1,z2,z3]
+     *
+     * */
+    var base = [[1,0,0],[0,1,0],[0,0,1]];
+    //var curBase = genBase (points);
+    //curBase =  [[0.93296281 , -0.185281410704 , 0.308428215228],
+    //            [0.24997492 , 0.950296571472 , -0.185281410704],
+    //            [-0.2588    , 0.24997492     , 0.93296281]];
+    var thetaY = Math.asin( - curBase[2][0]);
+    var thetaZ = Math.asin( curBase[1][0] / (Math.cos(thetaY)) );
+    var thetaX = Math.asin( curBase[2][1] / (Math.cos(thetaY)) );
+    console.log ( "z1:" + curBase[2][0] + " y1:" + curBase[1][0] + " z2:" + curBase[2][1] );
+    console.log ([thetaX/Math.PI*180, thetaY/Math.PI*180, thetaZ/Math.PI*180]);
+}
+
+function getThetaX() {
+    console.log( getAllParticles() );
+}
+function getThetaY() {}
+function getThetaZ() {}
+function getA() {}
+function setPin(a,b,c,d) {
+}
+
+
+function controller (getAllParticles, setPin) {
 
     this. S;        // S = a0 + a1 + a2 + a3 + ... + ai
     this. thetaXi;   // 
@@ -51,12 +102,6 @@ function controller (getThetaX, getThetaY, getThetaZ, getA, setPin) {
         thetaYi = getThetaY();
         thetaZi = getThetaZ();
         ai = getA();
-        
-    
     }
 }
-function set (a,b,c,d) {return a+b+c+d;}
-var t = new controller (get,get,get,get, set);
-t.setup();
-console.log(t);
 
