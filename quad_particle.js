@@ -11,15 +11,15 @@
 **	Quadrotor Particle Model
 	Particle Array Index: 
 
-	<Ac	10                  2 Cw>
-		12 \  9        1  / 4
-			 11 \ 	 / 3
-				  17 
-				  18	
+	<Ac	 9                  1 Cw>
+		11 \  8        0  / 3
+			 10 \ 	 / 2
+				  16 
+				  17	
 				/ 	 \
-			  5        12
-		 6 /  7        15 \ 14
-	 <Cw 8                  16  Ac>
+			  4        12
+		 5 /  6        14 \ 13
+	 <Cw 7                  15  Ac>
 
 	X
 	|
