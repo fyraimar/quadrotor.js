@@ -13,7 +13,7 @@
     pitchObject.add( camera );
 
     var yawObject = new THREE.Object3D();
-    yawObject.position.y = 2;
+    yawObject.position.z = 10;
     yawObject.add( pitchObject );
 
     var quat = new THREE.Quaternion();
@@ -26,7 +26,7 @@
     var canJump = false;
 
     var contactNormal = new CANNON.Vec3(); // Normal in the contact, pointing *out* of whatever the player touched
-    var upAxis = new CANNON.Vec3(0,1,0);
+    var upAxis = new CANNON.Vec3(0,0,1);
     cannonBody.addEventListener("collide",function(e){
         var contact = e.contact;
 
@@ -53,7 +53,7 @@
         var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
         var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-        yawObject.rotation.y -= movementX * 0.002;
+        yawObject.rotation.z -= movementX * 0.002;
         pitchObject.rotation.x -= movementY * 0.002;
 
         pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
@@ -84,7 +84,7 @@
 
             case 32: // space
                 if ( canJump === true ){
-                    velocity.y = jumpVelocity;
+                    velocity.z = jumpVelocity;
                 }
                 canJump = true;
                 break;
@@ -131,7 +131,7 @@
     };
 
     this.getDirection = function(targetVec){
-        targetVec.set(0,0,-1);
+        targetVec.set(0,-1,0);
         quat.multiplyVector3(targetVec);
     }
 
@@ -146,10 +146,10 @@
         inputVelocity.set(0,0,0);
 
         if ( moveForward ){
-            inputVelocity.z = -velocityFactor * delta;
+            inputVelocity.y = velocityFactor * delta;
         }
         if ( moveBackward ){
-            inputVelocity.z = velocityFactor * delta;
+            inputVelocity.y = -velocityFactor * delta;
         }
 
         if ( moveLeft ){
@@ -160,12 +160,12 @@
         }
 
         // Convert velocity to world coordinates
-        quat.setFromEuler({x:pitchObject.rotation.x, y:yawObject.rotation.y, z:0},"XYZ");
+        quat.setFromEuler({x:pitchObject.rotation.x, y:0, z:yawObject.rotation.z},"XYZ");
         quat.multiplyVector3(inputVelocity);
 
         // Add to the object
         velocity.x += inputVelocity.x;
-        velocity.z += inputVelocity.z;
+        velocity.y += inputVelocity.y;
 
         cannonBody.position.copy(yawObject.position);
     };

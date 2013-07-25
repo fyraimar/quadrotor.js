@@ -24,7 +24,7 @@
 	X
 	|
 	|
-	o - ->Z
+	o - ->Y
 **
 
 **	2 -- 17 : len = outerlen * Math.sqrt(2)
@@ -47,7 +47,7 @@
 		var particleMeshes = [];			// THREE.Mesh
 		var particleConstraint = [];		// Distance Constraint
 		
-		var modelPosition = new CANNON.Vec3(-5,10,-5);						// Vec3 default: X, Y, Z
+		var modelPosition = new CANNON.Vec3(-5,-5,10);						// Vec3 default: X, Y, Z
 		var modelMaterial = new THREE.MeshLambertMaterial( {color:0x0} );	// THREE - Material
 		var modelInnerLen = 0;
 		var modelOuterLen = 0;
@@ -130,7 +130,7 @@
 		// setForceArray: CANNON.Vec3[4]      -->   arr[1,5,9,13]
 		this.setModelForce_norm = function (setForceArray){
 			var deflexion = new CANNON.Quaternion();
-			var originPos = new CANNON.Vec3(0,1,0);
+			var originPos = new CANNON.Vec3(0,0,1);
 			var nowPos = new CANNON.Vec3(particles[16].position.x - particles[17].position.x,
 										particles[16].position.y - particles[17].position.y,
 										particles[16].position.z - particles[17].position.z);
@@ -165,9 +165,9 @@
 				rad = Math.pow( (131219 * pinsArr[i] - 802520)*2, 1/3 ) * 62.832;
 				force_up = 2.2407e-10 * rad*rad - 2.5540e-3;
 				force_side = (1.3214e-12 * rad*rad - 8.9615e-6) / 43.15e-3 / Math.sqrt(2);
-				forceArr[i] = new CANNON.Vec3(force_side * direction[2*i], 
-											force_up, 
-											force_side * direction[2*i+1]);
+				forceArr[i] = new CANNON.Vec3(force_side * direction[2*i],  
+											force_side * direction[2*i+1],
+											force_up);
 			}
 			console.log("force_up="+force_up);
 			console.log("force_side=" +force_side);
@@ -230,10 +230,10 @@
 				var innerParticleDown = new CANNON.Particle (particalMass[4*i+2]);
 				var outerParticleDown = new CANNON.Particle (particalMass[4*i+3]);
 				
-				innerParticleUp.position.set ( modelPosition.x + direction[i*2] * innerLen, modelPosition.y + height, modelPosition.z + direction[i*2+1] * innerLen );
-				outerParticleUp.position.set ( modelPosition.x + direction[i*2] * outerLen, modelPosition.y + height, modelPosition.z + direction[i*2+1] * outerLen );
-				innerParticleDown.position.set ( modelPosition.x + direction[i*2] * innerLen, modelPosition.y, modelPosition.z + direction[i*2+1] * innerLen );
-				outerParticleDown.position.set ( modelPosition.x + direction[i*2] * outerLen, modelPosition.y, modelPosition.z + direction[i*2+1] * outerLen );
+				innerParticleUp.position.set ( modelPosition.x + direction[i*2] * innerLen, modelPosition.y + direction[i*2+1] * innerLen, modelPosition.z + height);
+				outerParticleUp.position.set ( modelPosition.x + direction[i*2] * outerLen, modelPosition.y + direction[i*2+1] * outerLen, modelPosition.z + height);
+				innerParticleDown.position.set ( modelPosition.x + direction[i*2] * innerLen, modelPosition.y + direction[i*2+1] * innerLen, modelPosition.z );
+				outerParticleDown.position.set ( modelPosition.x + direction[i*2] * outerLen, modelPosition.y + direction[i*2+1] * outerLen, modelPosition.z );
 				
 				particles.push (innerParticleUp);
 				particles.push (outerParticleUp);
@@ -249,10 +249,10 @@
 				var innerBallMeshDown = new THREE.Mesh (innerBallDown, modelMaterial);
 				var outerBallMeshDown = new THREE.Mesh (outerBallDown, modelMaterial);
 
-				innerBallMeshUp.position.set ( modelPosition.x + direction[i*2] * innerLen, modelPosition.y + height, modelPosition.z + direction[i*2+1] * innerLen );
-				outerBallMeshUp.position.set ( modelPosition.x + direction[i*2] * innerLen, modelPosition.y + height, modelPosition.z + direction[i*2+1] * innerLen );
-				innerBallMeshDown.position.set ( modelPosition.x + direction[i*2] * innerLen, modelPosition.y, modelPosition.z + direction[i*2+1] * innerLen );
-				outerBallMeshDown.position.set ( modelPosition.x + direction[i*2] * innerLen, modelPosition.y, modelPosition.z + direction[i*2+1] * innerLen );
+				innerBallMeshUp.position.set ( modelPosition.x + direction[i*2] * innerLen, modelPosition.y + direction[i*2+1] * innerLen, modelPosition.z + height );
+				outerBallMeshUp.position.set ( modelPosition.x + direction[i*2] * outerLen, modelPosition.y + direction[i*2+1] * outerLen, modelPosition.z + height );
+				innerBallMeshDown.position.set ( modelPosition.x + direction[i*2] * innerLen, modelPosition.y + direction[i*2+1] * innerLen, modelPosition.z );
+				outerBallMeshDown.position.set ( modelPosition.x + direction[i*2] * outerLen, modelPosition.y + direction[i*2+1] * outerLen, modelPosition.z );
 
 				innerBallMeshUp.castShadow = true;
 				outerBallMeshUp.castShadow = true;
@@ -279,7 +279,7 @@
 			// center point
 			var centerParticleUp = new CANNON.Particle(particalMass[16]);
 			var centerParticleDown = new CANNON.Particle(particalMass[17]);
-			centerParticleUp.position.set (modelPosition.x, modelPosition.y + height, modelPosition.z);
+			centerParticleUp.position.set (modelPosition.x, modelPosition.y, modelPosition.z + height);
 			centerParticleDown.position.set (modelPosition.x, modelPosition.y, modelPosition.z);
 			
 			particles.push(centerParticleUp);
@@ -289,7 +289,7 @@
 			var centerBallDown = new THREE.SphereGeometry (0.1);
 			var centerBallMeshUp = new THREE.Mesh (centerBallUp, modelMaterial);
 			var centerBallMeshDown = new THREE.Mesh (centerBallUp, modelMaterial);	
-			centerBallMeshUp.position.set (modelPosition.x, modelPosition.y + 1, modelPosition.z);
+			centerBallMeshUp.position.set (modelPosition.x, modelPosition.y, modelPosition.z + height);
 			centerBallMeshDown.position.set (modelPosition.x, modelPosition.y, modelPosition.z);
 	
 			centerBallMeshUp.castShadow = true;
