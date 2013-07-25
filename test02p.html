@@ -166,7 +166,7 @@
           var mass = 1000, radius = 1.3;//We shouldn't affect the world.
           sphereShape = new CANNON.Sphere(radius);
           sphereBody = new CANNON.RigidBody (mass, sphereShape, physicsMaterial);
-          sphereBody.position.set(0,1,1);
+          sphereBody.position.set(0,-20,1);
           sphereBody.linearDamping = 0.2;
           world.add(sphereBody);
 		  
@@ -178,7 +178,7 @@
 
       function init() {
           camera = new THREE.PerspectiveCamera (75, window.Width / window.innerHeight, 0.1, 1000);
-
+		  
           scene = new THREE.Scene();
           scene.fog = new THREE.Fog (0xbbbbbb, 0, 500);
 

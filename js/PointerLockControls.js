@@ -13,9 +13,9 @@
     pitchObject.add( camera );
 
     var yawObject = new THREE.Object3D();
-    yawObject.position.z = 10;
+    yawObject.position.z = 2;
     yawObject.add( pitchObject );
-
+	
     var quat = new THREE.Quaternion();
 
     var moveForward = false;
@@ -45,7 +45,7 @@
     var velocity = cannonBody.velocity;
 
     var PI_2 = Math.PI / 2;
-
+	pitchObject.rotation.x = PI_2;
     var onMouseMove = function ( event ) {
 
         if ( scope.enabled === false ) return;
@@ -56,7 +56,7 @@
         yawObject.rotation.z -= movementX * 0.002;
         pitchObject.rotation.x -= movementY * 0.002;
 
-        pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+        pitchObject.rotation.x = Math.max( 0, Math.min( Math.PI, pitchObject.rotation.x ) );
     };
 
     var onKeyDown = function ( event ) {

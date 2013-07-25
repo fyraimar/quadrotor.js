@@ -47,7 +47,7 @@
 		var particleMeshes = [];			// THREE.Mesh
 		var particleConstraint = [];		// Distance Constraint
 		
-		var modelPosition = new CANNON.Vec3(-5,-5,10);						// Vec3 default: X, Y, Z
+		var modelPosition = new CANNON.Vec3(0,0,10);						// Vec3 default: X, Y, Z
 		var modelMaterial = new THREE.MeshLambertMaterial( {color:0x0} );	// THREE - Material
 		var modelInnerLen = 0;
 		var modelOuterLen = 0;
