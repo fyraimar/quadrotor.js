@@ -8,6 +8,7 @@
     <script src="libs/Three.js"></script>
     <script src="js/PointerLockControls.js"></script>
 	<script src="quad_particle.js"></script>
+	<script src="control.js"></script>
     <style>
       html, body {
         width: 100%;
@@ -65,7 +66,7 @@
     </div>
 
     <script>
-      var sphereShape, sphereBody, world, physicsMaterial, walls=[], balls=[], nallMeshes=[], boxes=[],boxMeshes=[];
+      var sphereShape, sphereBody, world, physicsMaterial, walls=[], balls=[], nallMeshes=[];
 
       var camera, scene, renderer;
       var geometry, material, mesh;
@@ -78,6 +79,7 @@
 
 	  //-------------- Model ---------------
 	  var quadrotor = new quadrotor_ParticleModel();
+	  var PIDcontrol = new controller(quadrotor.getAllParticles, quadrotor.setModelPin);
 	  
       if ( havePointerLock ) {
         var element = document.body;
@@ -247,10 +249,6 @@
           document.body.appendChild (renderer.domElement);
 
           window.addEventListener("resize", onWindowResize, false);
-          //addBox (1,1,1,10, 10, 10);
-          //addBox (1,1,1,-10, 10, 10);
-          //addBox (1,1,1,10, 10, -10);
-          //addBox (1,1,1,-10,10,-10);
 		  
 			// model mass = 0.035 or 0.036
 			quadrotor.constructModel(0.5, 1.2, 0.5,
@@ -265,26 +263,9 @@
 				 0.0018, 0.0018, 0.0018, 0.0018,
 				 0.0031, 0.0031]);
 			quadrotor.showModel(world, scene);
+			PIDcontrol.setup();
         }
-        /*
-        function addBox (length, width, height, x, y, z) {
-          var halfExtents = new CANNON.Vec3(length, width, height);
-          var boxShape = new CANNON.Box(halfExtents);
-          var boxGeometry = new THREE.CubeGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
 
-          var boxBody = new CANNON.RigidBody (5, boxShape);
-          var boxMesh = new THREE.Mesh(boxGeometry, material1);
-          world.add(boxBody);
-          scene.add(boxMesh);
-          boxBody.position.set(x,y,z);
-          boxMesh.position.set(x,y,z);
-          boxMesh.castShadow = true;
-          boxMesh.receiveShadow = true;
-          boxMesh.useQuaternion = true;
-          boxes.push(boxBody);
-          boxMeshes.push(boxMesh);
-        }
-*/
         function onWindowResize () {
           camera.aspect = window.innerWidth / window.innerHeight;
           camera.updateProjectionMatrix();
@@ -292,32 +273,19 @@
         }
 
         var dt = 1/60;
-			var f1 = new CANNON.Vec3(0,0,66);	//X+
-			var f2 = new CANNON.Vec3(0,0,66);	//X-
-			var f3 = new CANNON.Vec3(0,0,66);	//Y+
-			var f4 = new CANNON.Vec3(0,0,66);	//Y-
 		var counter = 0;
         function animate() {
           requestAnimationFrame( animate );
           if (controls.enabled) {
             world.step (dt);
-					
-			//quadrotor.getAngleX();
-			//var forceArr = [f1,f2,f3,f4];
-			//quadrotor.setModelForce_norm(forceArr);
-			quadrotor.setModelPin([124,124,124,124]);
-			
+
+			PIDcontrol.loop();		
 			quadrotor.updateAnimate();
             
             for (var i=0; i<balls.length; i ++) {
               balls[i].position.copy (ballMeshes[i].position);
               balls[i].quaternion.copy(ballMeshes[i].quaternion);
             }
-			/*
-            for (var i=0; i<boxes.length; i ++) {
-              boxes[i].position.copy (boxMeshes[i].position);
-              boxes[i].quaternion.copy(boxMeshes[i].quaternion);
-            }*/
           }
           controls.update (Date.now() - time);
           renderer.render (scene, camera);

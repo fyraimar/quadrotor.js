@@ -1,6 +1,6 @@
 /*
 **	Parameter Setting For quadrotor by real test
-	Mass: g  --- 25g + 10.4g						1e0
+	Mass: kg  --- 25g + 10.4g						1e-3
 	Distance: mm  --- par[2]<--86.5-->par[6]		1e-3
 	Velocity: mm\s									1e-3
 	Accelerate: mm\(s^2)							1e-3
@@ -125,10 +125,40 @@
 			scene.add(newBallSMesh);
 			
 		}
+			
+		// Set all particles' velocity 
+		// setVelocityArray :CANNON.Vec3[18]
+		this.setModelVelocity = function (setVelocityArray){
+			for (var i=0; i<particles.length; i++){
+				particles[i].velocity.set(setVelocityArray[i].x, setVelocityArray[i].y, setVelocityArray[i].z);
+			}
+		} 
+			
 		
-		// Set 4 point Vertical force
+		// Set force by setting pin of four rotor, translate:
+		// pinsArr: int[4] or float[4]
+		// force_up \ force_side: two forces to simulate
+		this.setModelPin = function (pinsArr){
+			console.log(pinsArr);
+		
+			var direction = [1,-1,1,-1,-1,-1,1,1];
+			var forceArr = new Array();
+			var rad, force_up, force_side;
+			
+			for (var i=0; i<4; i++){
+				rad = Math.pow( (131219 * pinsArr[i] - 802520)*2, 1/3 ) * 62.832;
+				force_up = 2.2407e-10 * rad*rad - 2.5540e-3;
+				force_side = (1.3214e-12 * rad*rad - 8.9615e-6) / 43.15e-3 / Math.sqrt(2);
+				forceArr[i] = new CANNON.Vec3(force_side * direction[2*i],  
+											force_side * direction[2*i+1],
+											force_up);
+			}
+			setModelForce_norm(forceArr);
+		}
+		
+		// Set 4 point Vertical force ----->follow by pins
 		// setForceArray: CANNON.Vec3[4]      -->   arr[1,5,9,13]
-		this.setModelForce_norm = function (setForceArray){
+		setModelForce_norm = function (setForceArray){
 			var deflexion = new CANNON.Quaternion();
 			var originPos = new CANNON.Vec3(0,0,1);
 			var nowPos = new CANNON.Vec3(particles[16].position.x - particles[17].position.x,
@@ -143,36 +173,7 @@
 			}
 			//console.log(particles[0].position);
 		}
-		
-		// Set all particles' velocity 
-		// setVelocityArray :CANNON.Vec3[18]
-		this.setModelVelocity = function (setVelocityArray){
-			for (var i=0; i<particles.length; i++){
-				particles[i].velocity.set(setVelocityArray[i].x, setVelocityArray[i].y, setVelocityArray[i].z);
-			}
-		} 
-			
-		
-		// Set force by setting pin of four rotor, translate:
-		// pinsArr: int[4] or float[4]
-		// force_up \ force_side: two forces to simulate
-		this.setModelPin = function (pinsArr){
-			var direction = [1,-1,1,-1,-1,-1,1,1];
-			var forceArr = new Array();
-			var rad, force_up, force_side;
-			
-			for (var i=0; i<4; i++){
-				rad = Math.pow( (131219 * pinsArr[i] - 802520)*2, 1/3 ) * 62.832;
-				force_up = 2.2407e-10 * rad*rad - 2.5540e-3;
-				force_side = (1.3214e-12 * rad*rad - 8.9615e-6) / 43.15e-3 / Math.sqrt(2);
-				forceArr[i] = new CANNON.Vec3(force_side * direction[2*i],  
-											force_side * direction[2*i+1],
-											force_up);
-			}
-			console.log("force_up="+force_up);
-			console.log("force_side=" +force_side);
-			this.setModelForce_norm(forceArr);
-		}
+	
 		
 		// add AxisZ turn force, to simulate spinning witn unbalance
 		// forceArr: CANNON.Vec3[4]      -->   arr[1,5,9,13]

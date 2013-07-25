@@ -57,6 +57,7 @@ function setPin(a,b,c,d) {
 function controller (getAllParticles, setPin) {
 
     this. S;        // S = a0 + a1 + a2 + a3 + ... + ai
+	this. Si;
     this. thetaXi;   // 
     this. thetaYi;   //
     this. thetaZi;   //
@@ -67,41 +68,48 @@ function controller (getAllParticles, setPin) {
     this. aj;
     this. E2;       //
     this. E1;       //
+	this. K2;
+    this. K1;
+	this. T1;
+    this. T2;
+	this. T3;
+    this. T4;
 
     this.setup = function () {
         this. S = this. ai = this. aj = getA();
-        this. thetaXi = this. thetaXj = getThetaX ();
-        this. thetaYi = this. thetaYj = getThetaY ();
-        this. thetaZi = this. thetaZj = getThetaZ ();
+        // this. thetaXi = this. thetaXj = getThetaX ();
+        // this. thetaYi = this. thetaYj = getThetaY ();
+        // this. thetaZi = this. thetaZj = getThetaZ ();
         this. K2 = 0.00000000013214;
         this. K1 = 0.00000000022407;
+		console.log(getAllParticles());
     }
 
     this.loop = function () {
-        var fi = 0.0000875 * ai - 0.026 * Si;
+        var fi = 0.0000875 * this.ai - 0.026 * this.Si;
 
-        var A = (fi + 0.35) / K1;
-        var B = Math.sqrt(2) * (-0.11 * thetaXi + 0.10 * thetaXj) / (0.0432 * K2);
-        var C = Math.sqrt(2) * (-0.11 * thetaYi + 0.10 * thetaYj) / (0.0432 * K1);
-        var D = (-0.11 * thetaZi + 0.10 * thetaZj) / K2;
+        var A = (fi + 0.35) / this.K1;
+        var B = Math.sqrt(2) * (-0.11 * this.thetaXi + 0.10 * this.thetaXj) / (0.0432 * this.K2);
+        var C = Math.sqrt(2) * (-0.11 * this.thetaYi + 0.10 * this.thetaYj) / (0.0432 * this.K1);
+        var D = (-0.11 * this.thetaZi + 0.10 * this.thetaZj) / this.K2;
 
-        setPin (
-            T1 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
-            T2 * 1/8 * (A - B + C + D) * Math.sqrt(A - B + C + D), 
-            T3 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
-            T4 * 1/8 * (A + B - C + D) * Math.sqrt(A + B - C + D)
-               );
+         setPin ([120,120,120,120
+            // T1 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
+            // T2 * 1/8 * (A - B + C + D) * Math.sqrt(A - B + C + D), 
+            // T3 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
+            // T4 * 1/8 * (A + B - C + D) * Math.sqrt(A + B - C + D)
+               ]);
         
-        aj = ai;
-        thetaXj = thetaXi;
-        thetaYj = thetaYi;
-        thetaZj = thetaZi;
-        Si += ai;
+        this.aj = this.ai;
+        this.thetaXj = this.thetaXi;
+        this.thetaYj = this.thetaYi;
+        this.thetaZj = this.thetaZi;
+        this.Si += this.ai;
 
-        thetaXi = getThetaX();
-        thetaYi = getThetaY();
-        thetaZi = getThetaZ();
-        ai = getA();
+        // this.thetaXi = getThetaX();
+        // this.thetaYi = getThetaY();
+        // this.thetaZi = getThetaZ();
+        //this.ai = getA();
     }
 }
 
