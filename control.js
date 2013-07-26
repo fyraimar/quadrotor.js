@@ -113,16 +113,16 @@ function controller (getAllParticles, setPin) {
         this.thetaZi = this.thetaZj = degreeXYZ[2];
         this.K2 = 0.0000000000013214;
         this.K1 = 0.00000000022407;
-        //console.log(getAllParticles());
+        console.log(getAllParticles());
     }
 
     this.loop = function () {
         this.fi = 0.0000875 * this.ai - 0.026 * this.Si;
 
         this.A = (this.fi + 0.35) / this.K1;
-        this.B = Math.sqrt(2) * (-0.11 * this.thetaXi + 0.10 * this.thetaXj) / (0.0432 * this.K2);
-        this.C = Math.sqrt(2) * (-0.11 * this.thetaYi + 0.10 * this.thetaYj) / (0.0432 * this.K1);
-        this.D = (-0.11 * this.thetaZi + 0.10 * this.thetaZj) / this.K2;
+        this.B = Math.sqrt(2) * (-0.025 * this.thetaXi + 0.02 * this.thetaXj) / (0.0432 * this.K2);
+        this.C = Math.sqrt(2) * (-0.025 * this.thetaYi + 0.02 * this.thetaYj) / (0.0432 * this.K1);
+        this.D = (-0.25 * this.thetaZi + 0.2 * this.thetaZj) / this.K2;
 
         this.pin1 = this.T1 * 1/8 * (this.A + this.B + this.C - this.D) * Math.sqrt(this.A + this.B + this.C - this.D);
         this.pin2 = this.T2 * 1/8 * (this.A - this.B + this.C + this.D) * Math.sqrt(this.A - this.B + this.C + this.D); 
@@ -143,7 +143,7 @@ function controller (getAllParticles, setPin) {
                     130
                     ]);
         }
-            this.tempCounter ++;
+        this.tempCounter ++;
         console.log(this.tempCounter+":");
         console.log(this);
         sleep(1000);
