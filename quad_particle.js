@@ -139,7 +139,7 @@
 		// pinsArr: int[4] or float[4]
 		// force_up \ force_side: two forces to simulate
 		this.setModelPin = function (pinsArr){
-			console.log(pinsArr);
+			//console.log(pinsArr);
 		
 			var direction = [1,-1,1,-1,-1,-1,1,1];
 			var forceArr = new Array();

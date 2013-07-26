@@ -1,63 +1,60 @@
-
-
-function getThetaZYX ( points ) {
-    console.log("Seq:ZYX");
-    /**
-     *
-     *[x1,x2,x3],
-     *[y1,y2,y3],
-     *[z1,z2,z3]
-     *
-     * */
-    var base = [[1,0,0],
-                [0,1,0],
-                [0,0,1]];
-    //var curBase = genBase (points);
-    curBase =  [[0.93296281 , -0.185281410704 , 0.308428215228],
-                [0.24997492 , 0.950296571472 , -0.185281410704],
-                [-0.2588    , 0.24997492     , 0.93296281]];
-    var thetaY = Math.asin( curBase[0][2] );
-    var thetaZ = Math.asin( -curBase[0][1] / (Math.cos(thetaY)) );
-    var thetaX = Math.asin( -curBase[1][2] / (Math.cos(thetaY)) );
-    console.log ( "x3:" + curBase[0][2] + " x2:" + curBase[0][1] + " y2:" + curBase[1][2] );
-    console.log ([thetaX/Math.PI*180, thetaY/Math.PI*180, thetaZ/Math.PI*180]);
+function sleep(milliSeconds){
+    var startTime = new Date().getTime(); // get the current time
+    while (new Date().getTime() < startTime + milliSeconds); // hog cpu
 }
 
+
+
+/**
+ * Rz . Ry . Rx . Vec3a = Vec3b
+ *[x1,x2,x3],
+ *[y1,y2,y3],
+ *[z1,z2,z3]
+ */
 function getThetaXYZ ( points ) {
-    console.log("Seq:XYZ");
-    /**
-     *
-     *[x1,x2,x3],
-     *[y1,y2,y3],
-     *[z1,z2,z3]
-     *
-     * */
     var base = [[1,0,0],[0,1,0],[0,0,1]];
-    //var curBase = genBase (points);
-    //curBase =  [[0.93296281 , -0.185281410704 , 0.308428215228],
-    //            [0.24997492 , 0.950296571472 , -0.185281410704],
-    //            [-0.2588    , 0.24997492     , 0.93296281]];
+    var curBase = genBase (points);
     var thetaY = Math.asin( - curBase[2][0]);
     var thetaZ = Math.asin( curBase[1][0] / (Math.cos(thetaY)) );
     var thetaX = Math.asin( curBase[2][1] / (Math.cos(thetaY)) );
-    console.log ( "z1:" + curBase[2][0] + " y1:" + curBase[1][0] + " z2:" + curBase[2][1] );
-    console.log ([thetaX/Math.PI*180, thetaY/Math.PI*180, thetaZ/Math.PI*180]);
+    return [thetaX,thetaY,thetaZ];
+    //console.log ( "z1:" + curBase[2][0] + " y1:" + curBase[1][0] + " z2:" + curBase[2][1] );
+    //console.log ([thetaX/Math.PI*180, thetaY/Math.PI*180, thetaZ/Math.PI*180]);
 }
 
-function getThetaX() {
-    console.log( getAllParticles() );
-}
-function getThetaY() {}
-function getThetaZ() {}
-function getA() {}
-function setPin(a,b,c,d) {
-}
+function genBase (points) {
+    //console.log(points);
 
+    var vecBaseX = new CANNON.Vec3(0,0,0);
+    var vecBaseY = new CANNON.Vec3(0,0,0);
+    var vecBaseZ = new CANNON.Vec3(0,0,0);
+
+    //console.log(points[17]);
+    vecBaseZ = points[16].position.vsub(points[17].position);
+    vecBaseX = points[10].position.vadd(points[2].position).vsub(points[17].position).vsub(points[17].position);
+    vecBaseY = points[14].position.vadd(points[2].position).vsub(points[17].position).vsub(points[17].position);
+    vecBaseX.normalize();
+    vecBaseY.normalize();
+    vecBaseZ.normalize();
+    //console.log("16:" + points[16].position);
+    //console.log("17:" + points[17].position);
+    //console.log("02:" + points[2].position);
+    //console.log("10:" + points[10].position);
+    //console.log("14:" + points[14].position);
+    //vecBaseZ.normalize();
+    //console.log(vecBaseX +  "|" + vecBaseY + "|" + vecBaseZ);
+    return [[vecBaseX.x,vecBaseY.x,vecBaseZ.x],
+           [vecBaseX.y,vecBaseY.y,vecBaseZ.y],
+           [vecBaseX.z,vecBaseY.z,vecBaseZ.z]];
+}
+/**
+ * Main controller function
+ */
 
 function controller (getAllParticles, setPin) {
 
     this. S;        // S = a0 + a1 + a2 + a3 + ... + ai
-	this. Si;
+    this. Si;
     this. thetaXi;   // 
     this. thetaYi;   //
     this. thetaZi;   //
@@ -66,23 +63,35 @@ function controller (getAllParticles, setPin) {
     this. thetaZj;   //
     this. ai;
     this. aj;
-    this. E2;       //
-    this. E1;       //
-	this. K2;
+    this. K2;
     this. K1;
-	this. T1;
-    this. T2;
-	this. T3;
-    this. T4;
+    this. T1 = 0.0000000000073416692;
+    this. T2 = 0.0000000000073416692;
+    this. T3 = 0.0000000000073416692;
+    this. T4 = 0.0000000000073416692;
 
+    function getA ( particles ) {
+        var forceSumX = 0; 
+        var forceSumY = 0; 
+        var forceSumZ = 0; 
+        var mSum = 0;
+        for ( var i=0 ; i < particles.length ; i ++  ) {
+            forceSumX += particles[i].force.x;
+            forceSumY += particles[i].force.y;
+            forceSumZ += particles[i].force.z;
+            mSum += particles[i].mass;
+        }
+        return forceSumZ / mSum - 10;
+    }
     this.setup = function () {
-        this. S = this. ai = this. aj = getA();
-        // this. thetaXi = this. thetaXj = getThetaX ();
-        // this. thetaYi = this. thetaYj = getThetaY ();
-        // this. thetaZi = this. thetaZj = getThetaZ ();
-        this. K2 = 0.00000000013214;
-        this. K1 = 0.00000000022407;
-		console.log(getAllParticles());
+        this.Si = this.ai = this.aj = getA(getAllParticles());
+        var degreeXYZ = getThetaXYZ(getAllParticles());
+        this.thetaXi = this.thetaXj = degreeXYZ[0];
+        this.thetaYi = this.thetaYj = degreeXYZ[1];
+        this.thetaZi = this.thetaZj = degreeXYZ[2];
+        this.K2 = 0.0000000000013214;
+        this.K1 = 0.00000000022407;
+        //console.log(getAllParticles());
     }
 
     this.loop = function () {
@@ -92,24 +101,35 @@ function controller (getAllParticles, setPin) {
         var B = Math.sqrt(2) * (-0.11 * this.thetaXi + 0.10 * this.thetaXj) / (0.0432 * this.K2);
         var C = Math.sqrt(2) * (-0.11 * this.thetaYi + 0.10 * this.thetaYj) / (0.0432 * this.K1);
         var D = (-0.11 * this.thetaZi + 0.10 * this.thetaZj) / this.K2;
+        //console.log(A+":"+fi+":"+this.ai+":"+this.Si);
+        console.log("ABCD: " + A+":"+B+":"+C+":"+D);
 
-         setPin ([120,120,120,120
-            // T1 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
-            // T2 * 1/8 * (A - B + C + D) * Math.sqrt(A - B + C + D), 
-            // T3 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
-            // T4 * 1/8 * (A + B - C + D) * Math.sqrt(A + B - C + D)
-               ]);
-        
+        console.log ([
+                this.T1 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
+                this.T2 * 1/8 * (A - B + C + D) * Math.sqrt(A - B + C + D), 
+                this.T3 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
+                this.T4 * 1/8 * (A + B - C + D) * Math.sqrt(A + B - C + D)
+                ]);
+
+        setPin ([
+                this.T1 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
+                this.T2 * 1/8 * (A - B + C + D) * Math.sqrt(A - B + C + D), 
+                this.T3 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
+                this.T4 * 1/8 * (A + B - C + D) * Math.sqrt(A + B - C + D)
+                ]);
+        sleep(1000);
+
         this.aj = this.ai;
         this.thetaXj = this.thetaXi;
         this.thetaYj = this.thetaYi;
         this.thetaZj = this.thetaZi;
         this.Si += this.ai;
 
-        // this.thetaXi = getThetaX();
-        // this.thetaYi = getThetaY();
-        // this.thetaZi = getThetaZ();
-        //this.ai = getA();
+        var degreeXYZ = getThetaXYZ(getAllParticles());
+        this.thetaXi = degreeXYZ[0];
+        this.thetaYi = degreeXYZ[1];
+        this.thetaZi = degreeXYZ[2];
+        this.ai = getA(getAllParticles());
     }
 }
 
