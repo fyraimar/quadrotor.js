@@ -53,7 +53,7 @@ function genBase (points) {
 
 function controller (getAllParticles, setPin) {
 
-    this. S;        // S = a0 + a1 + a2 + a3 + ... + ai
+    this. Sj;        // S = a0 + a1 + a2 + a3 + ... + ai
     this. Si;
     this. thetaXi;   // 
     this. thetaYi;   //
@@ -69,7 +69,27 @@ function controller (getAllParticles, setPin) {
     this. T2 = 0.0000000000073416692;
     this. T3 = 0.0000000000073416692;
     this. T4 = 0.0000000000073416692;
+    this. tempCounter;
+    /**
+     *After that was all temp data we used which are to be shown in web console.
+     */
 
+    this.A;
+    this.B;
+    this.C;
+    this.D;
+    this.fi;
+    this.pin1;
+    this.pin2;
+    this.pin3;
+    this.pin4;
+
+    /**
+     *
+     *private function.
+     *
+     *
+     */
     function getA ( particles ) {
         var forceSumX = 0; 
         var forceSumY = 0; 
@@ -84,6 +104,8 @@ function controller (getAllParticles, setPin) {
         return forceSumZ / mSum - 10;
     }
     this.setup = function () {
+        this.tempCounter = 0;
+        this.Sj= 0;
         this.Si = this.ai = this.aj = getA(getAllParticles());
         var degreeXYZ = getThetaXYZ(getAllParticles());
         this.thetaXi = this.thetaXj = degreeXYZ[0];
@@ -95,34 +117,42 @@ function controller (getAllParticles, setPin) {
     }
 
     this.loop = function () {
-        var fi = 0.0000875 * this.ai - 0.026 * this.Si;
+        this.fi = 0.0000875 * this.ai - 0.026 * this.Si;
 
-        var A = (fi + 0.35) / this.K1;
-        var B = Math.sqrt(2) * (-0.11 * this.thetaXi + 0.10 * this.thetaXj) / (0.0432 * this.K2);
-        var C = Math.sqrt(2) * (-0.11 * this.thetaYi + 0.10 * this.thetaYj) / (0.0432 * this.K1);
-        var D = (-0.11 * this.thetaZi + 0.10 * this.thetaZj) / this.K2;
-        //console.log(A+":"+fi+":"+this.ai+":"+this.Si);
-        console.log("ABCD: " + A+":"+B+":"+C+":"+D);
+        this.A = (this.fi + 0.35) / this.K1;
+        this.B = Math.sqrt(2) * (-0.11 * this.thetaXi + 0.10 * this.thetaXj) / (0.0432 * this.K2);
+        this.C = Math.sqrt(2) * (-0.11 * this.thetaYi + 0.10 * this.thetaYj) / (0.0432 * this.K1);
+        this.D = (-0.11 * this.thetaZi + 0.10 * this.thetaZj) / this.K2;
 
-        console.log ([
-                this.T1 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
-                this.T2 * 1/8 * (A - B + C + D) * Math.sqrt(A - B + C + D), 
-                this.T3 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
-                this.T4 * 1/8 * (A + B - C + D) * Math.sqrt(A + B - C + D)
-                ]);
-
-        setPin ([
-                this.T1 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
-                this.T2 * 1/8 * (A - B + C + D) * Math.sqrt(A - B + C + D), 
-                this.T3 * 1/8 * (A + B + C - D) * Math.sqrt(A + B + C - D), 
-                this.T4 * 1/8 * (A + B - C + D) * Math.sqrt(A + B - C + D)
-                ]);
+        this.pin1 = this.T1 * 1/8 * (this.A + this.B + this.C - this.D) * Math.sqrt(this.A + this.B + this.C - this.D);
+        this.pin2 = this.T2 * 1/8 * (this.A - this.B + this.C + this.D) * Math.sqrt(this.A - this.B + this.C + this.D); 
+        this.pin3 = this.T3 * 1/8 * (this.A + this.B + this.C - this.D) * Math.sqrt(this.A + this.B + this.C - this.D); 
+        this.pin4 = this.T4 * 1/8 * (this.A + this.B - this.C + this.D) * Math.sqrt(this.A + this.B - this.C + this.D);
+        if ( this.tempCounter > 5 ) {
+            setPin ([
+                    this.pin1,
+                    this.pin2,
+                    this.pin3,
+                    this.pin4
+                    ]);
+        } else {
+            setPin ([ 
+                    130,
+                    130,
+                    130,
+                    130
+                    ]);
+        }
+            this.tempCounter ++;
+        console.log(this.tempCounter+":");
+        console.log(this);
         sleep(1000);
 
         this.aj = this.ai;
         this.thetaXj = this.thetaXi;
         this.thetaYj = this.thetaYi;
         this.thetaZj = this.thetaZi;
+        this.Sj = this.Si;
         this.Si += this.ai;
 
         var degreeXYZ = getThetaXYZ(getAllParticles());
