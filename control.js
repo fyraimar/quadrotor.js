@@ -42,7 +42,7 @@ function genBase (points) {
     //console.log("10:" + points[10].position);
     //console.log("14:" + points[14].position);
     //vecBaseZ.normalize();
-    //console.log(vecBaseX +  "|" + vecBaseY + "|" + vecBaseZ);
+    //console.log(vecBaseX +  "\n" + vecBaseY + "\n" + vecBaseZ);
     return [[vecBaseX.x,vecBaseY.x,vecBaseZ.x],
            [vecBaseX.y,vecBaseY.y,vecBaseZ.y],
            [vecBaseX.z,vecBaseY.z,vecBaseZ.z]];
@@ -145,8 +145,87 @@ function controller (getAllParticles, setPin) {
         }
         this.tempCounter ++;
         console.log(this.tempCounter+":");
-        console.log(this);
-        sleep(1000);
+        //console.log(this);
+        console.log( "" 
+                + "si-1:" + 
+                this. Sj 
+                + "\n"  
+                + "si:" + 
+                this. Si
+                + "\n"  
+                + "thataXi:" + 
+                this. thetaXi   // 
+                + "\n"  
+                + "thetaYi:" + 
+                this. thetaYi   //
+                + "\n"  
+                + "thetaZi:" + 
+                this. thetaZi   //
+                + "\n"  
+                + "thetaXi-1:" + 
+                this. thetaXj   // 
+                + "\n"  
+                + "thetaYi-1:" + 
+                this. thetaYj   //
+                + "\n"  
+                + "thetaZi-1:" + 
+                this. thetaZj   //
+                + "\n"  
+                + "ai:" + 
+                this. ai
+                + "\n"  
+                + "ai-1:" + 
+                this. aj
+                + "\n"  
+                + "k2:" + 
+                this. K2
+                + "\n"  
+                + "k1:" + 
+                this. K1
+                + "\n"  
+                + "t1:" + 
+                this. T1 
+                + "\n"  
+                + "t2:" + 
+                this. T2 
+                + "\n"  
+                + "t3:" + 
+                this. T3 
+                + "\n"  
+                + "t4:" + 
+                this. T4 
+                + "\n"  
+                + "counter:" + 
+                this. tempCounter
+                + "\n"  
+                + "A:" + 
+                this.A
+                + "\n"  
+                + "B:" + 
+                this.B
+                + "\n"  
+                + "C:" + 
+                this.C
+                + "\n"  
+                + "D:" + 
+                this.D
+                + "\n"  
+                + "fi:" + 
+                this.fi
+                + "\n"  
+                + "pin1:" + 
+                this.pin1
+                + "\n"  
+                + "pin2:" + 
+                this.pin2
+                + "\n"  
+                + "pin3:" + 
+                this.pin3
+                + "\n"  
+                + "pin4:" + 
+                this.pin4
+                )        ;
+        //sleep(1000);
 
         this.aj = this.ai;
         this.thetaXj = this.thetaXi;
