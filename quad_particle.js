@@ -10,27 +10,29 @@
 
 **	Quadrotor Particle Model
 	Particle Array Index: 
-
+	
+  (2)							 (1)
 	<Ac	 9                  1 Cw>
 		11 \  8        0  / 3
 			 10 \ 	 / 2
-				  16 
-				  17	
-				/ 	 \
-			  4        12
-		 5 /  6        14 \ 13
+				  16 					|
+				  17				  -	o - ->Y
+				/ 	 \					|
+			  4        12				|
+		 5 /  6        14 \ 13			X
 	 <Cw 7                  15  Ac>
-
-	X
-	|
-	|
-	o - ->Y
+  (3)							 (4)
 **
 
-**	2 -- 17 : len = outerlen * Math.sqrt(2)
-	1 -- 17 : len = innerlen * Math.sqrt(2)
-	17 -- 18: len = height
+**	length:
+	1 -- 16 : len = outerlen * Math.sqrt(2)		-- 43.2 mm -- 4.32cm(1e-2)
+	0 -- 16 : len = innerlen * Math.sqrt(2)		-- 33.6 mm -- 3.36cm(1e-2)
+	16 -- 17: len = height						--            0.5cm(1e-2)
 **	
+
+**	Mass:
+	0\4\8\12  (35/4)g
+**
 
 **	pin --> n --> F
 	1. force up
@@ -139,9 +141,13 @@
 		// pinsArr: int[4] or float[4]
 		// force_up \ force_side: two forces to simulate
 		this.setModelPin = function (pinsArr){
-			console.log(pinsArr);
+			var temp = pinsArr[2];
+			pinsArr[2] = pinsArr[1];
+			pinsArr[1] = temp;
+			
+			//console.log(pinsArr);
 		
-			var direction = [1,-1,1,-1,-1,-1,1,1];
+			var direction = [1,1, -1,-1, 1,-1, -1,1];
 			var forceArr = new Array();
 			var rad, force_up, force_side;
 			
@@ -152,6 +158,7 @@
 				forceArr[i] = new CANNON.Vec3(force_side * direction[2*i],  
 											force_side * direction[2*i+1],
 											force_up);
+				//console.log('force_side ' +(i+1)+" = " +force_side);
 			}
 			setModelForce_norm(forceArr);
 		}
@@ -222,7 +229,7 @@
 		// innerLen, outerLen, height: float
 		// particalMass: float[18] -- index as graph
 		function constructModelPoint(innerLen, outerLen, height, particalMass){
-			var direction = [1,1,-1,-1,1,-1,-1,1];			
+			var direction = [-1,1, 1,-1, -1,-1, 1,1];			
 			
 			// points except center 
 			for (var i=0 ; i < 4; i ++) {
