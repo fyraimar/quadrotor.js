@@ -141,7 +141,7 @@ function controller (getAllParticles, setPin) {
         this.pin2 = this.T2 * 1/8 * (this.A - this.B + this.C + this.D) * Math.sqrt(this.A - this.B + this.C + this.D); 
         this.pin3 = this.T3 * 1/8 * (this.A + this.B + this.C - this.D) * Math.sqrt(this.A + this.B + this.C - this.D); 
         this.pin4 = this.T4 * 1/8 * (this.A + this.B - this.C + this.D) * Math.sqrt(this.A + this.B - this.C + this.D);
-        if ( this.tempCounter <0 ) {
+        if ( this.tempCounter >2 ) {
             setPin ([
                     this.pin1 + Math.random()*10,
                     this.pin2 + Math.random()*10,
@@ -150,10 +150,10 @@ function controller (getAllParticles, setPin) {
                     ]);
         } else {
             setPin ([ 
-                    0,
-                    0,
-                    0,
-                    0
+                    130,
+                    130,
+                    130,
+                    130
                     ]);
         }
         this.tempCounter ++;
