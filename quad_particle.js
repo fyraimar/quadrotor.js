@@ -42,6 +42,18 @@
 		131219 * pin - 802520 =  (n*6.2832)^3 / 2000
 		F(sp) = (1.3214e-12 * n^2 - 8.9615e-6) / 43.15e-3
 **
+
+
+error 1: rotors on quadrotor not in Z+ direction
+	force: as the direction (Vec3)
+	torque:
+		1) along body: 
+		2) 
+
+
+
+
+
 */
 
 	quadrotor_ParticleModel = function(){
@@ -310,6 +322,10 @@
 			particleMeshes.push (centerBallMeshUp);
 			particleMeshes.push (centerBallMeshDown);
 			//console.log(particleMeshes.length);
+			
+			for (var i=0; i<particles.length; i++ ) {
+				particles[i].linearDamping =0;
+            }
 			
 			// ----for test ----velocity
 			particles[1].velocity.set(0,0,0);

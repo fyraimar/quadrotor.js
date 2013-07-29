@@ -3,15 +3,20 @@ function sleep(milliSeconds){
     while (new Date().getTime() < startTime + milliSeconds); // hog cpu
 }
 
-
-
 /**
  * Rz . Ry . Rx . Vec3a = Vec3b
  *[x1,x2,x3],
  *[y1,y2,y3],
  *[z1,z2,z3]
  */
+//****************************************************************************//
+//坐标系转化基准：确定z+轴自旋角( ThetaZ),矩阵Rz->                            //
+//                确定x+轴与水平面线面角->(ThetaY),矩阵Ry->                   //
+//                确定y+轴与水平面线面角(ThetaX),矩阵Rx;                      //
+//  v(飞行器坐标系)=RxRyRz*v(地面坐标系) ; 关系矩阵M=RxRyRz ;                 //
+//****************************************************************************//
 function getThetaXYZ ( points ) {
+//用于获取三个幅角参数，通过关系矩阵直接计算幅角值 
     var base = [[1,0,0],[0,1,0],[0,0,1]];
     var curBase = genBase (points);
     var thetaY = Math.asin( - curBase[2][0]);
@@ -25,11 +30,9 @@ function getThetaXYZ ( points ) {
     //console.log ([thetaX/Math.PI*180, thetaY/Math.PI*180, thetaZ/Math.PI*180]);
 }
 
-
-
 function genBase (points) {
+         
     //console.log(points);
-
     var vecBaseX = new CANNON.Vec3(0,0,0);
     var vecBaseY = new CANNON.Vec3(0,0,0);
     var vecBaseZ = new CANNON.Vec3(0,0,0);
@@ -56,49 +59,90 @@ function genBase (points) {
            [vecBaseX.y,vecBaseY.y,vecBaseZ.y],
            [vecBaseX.z,vecBaseY.z,vecBaseZ.z]];
 }
-/**
- * Main controller function
- */
 
-function controller (getAllParticles, setPin) {
+//****************************************************************************//
+//                         Main controller function                           //
+//****************************************************************************//
 
-    this. Sj;        // S = a0 + a1 + a2 + a3 + ... + ai
-    this. Si;
-    this. thetaXi;   // 
-    this. thetaYi;   //
-    this. thetaZi;   //
-    this. thetaXj;   // 
-    this. thetaYj;   //
-    this. thetaZj;   //
-    this. ai;
+
+function controller (getAllParticles, setPin) { //输出控制函数        
+//****************************************************************************//   
+//                       算法实现可直接调整的参数                             // 
+//****************************************************************************//    
+    //系统周期 
+    T_set=1/200;
+    
+    //纵向悬浮PI参数 
+    this.kp_a;
+    this.ki_a;
+    
+    //力矩平衡PD参数 
+    this.Kp_x; 
+    this.Kd_x;
+    this.Kp_y;
+    this.Kd_y;
+    this.Kp_z;
+    this.Kd_z;
+    
+    //定义平衡设置
+    this.a_revise=0;
+    this.x_revise=0;
+    this.y_revise=0;
+     
+    //定义期望速度
+    this.v_expectation=0; 
+    this.x_expectation=0;
+    this.y_expectation=0;   
+//****************************************************************************//
+//                       陀螺仪DMP算法提供出的参数                            //
+//****************************************************************************// 
+    //陀螺仪相邻周期返回的参数两组; 
+        //第i周期 (周期获取值) 
+    this. thetaXi;   //定义：第i周期y+与水平面线面角， y+在z轴投影为正则角为正; 
+    this. thetaYi;   //定义：第i周期x+与水平面线面角， x+在z轴投影为正则角为正; 
+    this. thetaZi;   //定义：z自旋角; 
+    this. ai;//定义：飞行器的纵向加速度，定义z+方向为正;
+    this. Si;//定义：Si = a0 + a1 + a2 + a3 + ... + ai
+             //引申性质：vi=T*Si 作为对于初态速度的速度增量 
+        //第i-1周期(存储值)
+    this. thetaXj;    
+    this. thetaYj;   
+    this. thetaZj;   
     this. aj;
-    this. K2;
-    this. K1;
+    this. Sj;        
+
+//****************************************************************************//
+//                          飞行器物理参数                                    //
+//****************************************************************************//
+    //螺旋桨参数 
+    this. K2;//螺旋桨参数K2-定义：螺旋桨产生偏移力矩与转速平方之比值; 
+    this. K1;//螺旋桨参数K1-定义：螺旋桨产生升力与转速平方之比值;
+    
+    //输出系数->定义：油门输出与转速三次方之比值; 
     this. T1 = 0.0000000000073416692;
     this. T2 = 0.0000000000073416692;
     this. T3 = 0.0000000000073416692;
     this. T4 = 0.0000000000073416692;
     this. tempCounter;
-    /**
-     *After that was all temp data we used which are to be shown in web console.
-     */
+    
+//****************************************************************************//
+//                         控制台输出展示参数                                 //
+//****************************************************************************// 
+    this.fi;//纵向调整所需的合外力 
+    this.A;//纵向合外力输出 
+    this.B;//X轴合力矩 
+    this.C;//Y轴合力矩 
+    this.D;//Z轴合力矩 
 
-    this.A;
-    this.B;
-    this.C;
-    this.D;
-    this.fi;
+    //对应各个电机实际输出 
     this.pin1;
     this.pin2;
     this.pin3;
     this.pin4;
 
-    /**
-     *
-     *private function.
-     *
-     *
-     */
+//****************************************************************************//
+//                          private function                                  //
+//****************************************************************************//
     function getA ( particles ) {
         var forceSumX = 0; 
         var forceSumY = 0; 
@@ -112,6 +156,7 @@ function controller (getAllParticles, setPin) {
         }
         return forceSumZ / mSum - 10;
     }
+    
     this.setup = function () {
         this.tempCounter = 0;
         this.Sj= 0;
@@ -141,12 +186,12 @@ function controller (getAllParticles, setPin) {
         this.pin2 = this.T2 * 1/8 * (this.A - this.B + this.C + this.D) * Math.sqrt(this.A - this.B + this.C + this.D); 
         this.pin3 = this.T3 * 1/8 * (this.A + this.B + this.C - this.D) * Math.sqrt(this.A + this.B + this.C - this.D); 
         this.pin4 = this.T4 * 1/8 * (this.A + this.B - this.C + this.D) * Math.sqrt(this.A + this.B - this.C + this.D);
-        if ( this.tempCounter >2 ) {
+        if ( this.tempCounter > 5 ) {
             setPin ([
-                    this.pin1 + Math.random()*10,
-                    this.pin2 + Math.random()*10,
-                    this.pin3 + Math.random()*10,
-                    this.pin4 + Math.random()*10
+                    this.pin1,
+                    this.pin2,
+                    this.pin3,
+                    this.pin4
                     ]);
         } else {
             setPin ([ 
@@ -157,9 +202,9 @@ function controller (getAllParticles, setPin) {
                     ]);
         }
         this.tempCounter ++;
-        //console.log(this.tempCounter+":");
+        console.log(this.tempCounter+":");
         //console.log(this);
-		/*console.log( "" 
+		console.log( "" 
                 + "si-1:" + 
                 this. Sj 
                 + "\n"  
@@ -236,8 +281,12 @@ function controller (getAllParticles, setPin) {
                 this.pin3
                 + "\n"  
                 + "pin4:" + 
-                this.pin4
-                )        ;*/
+                this.pin4 + 
+				" \n" + 
+				" particles data: " +
+				getAllParticles()[16].velocity
+                )        ;
+				
 		//sleep(1000);
 				
         this.aj = this.ai;

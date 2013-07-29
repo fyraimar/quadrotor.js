@@ -168,7 +168,7 @@
           var mass = 1000, radius = 1;//We shouldn't affect the world.
           sphereShape = new CANNON.Sphere(radius);
           sphereBody = new CANNON.RigidBody (mass, sphereShape, physicsMaterial);
-          sphereBody.position.set(0,-20,2);
+          sphereBody.position.set(0,-20,1);
           sphereBody.linearDamping = 0.9;
           world.add(sphereBody);
 
@@ -191,10 +191,10 @@
           scene.add (ambient);
           
           
-          light = new THREE.SpotLight (0xffffff);
+          light = new THREE.SpotLight (0xffaaff);
           //light.position.set (10 ,30 ,20);
           light.position.set (-100 ,-200 ,300);
-          light.target.position.set (0, 0, 0);
+          light.target.position.set (0, -50, 0);
           if (true) {
             light.itensity = 0.5;
             light.castShadow = true;
@@ -210,10 +210,10 @@
           }
           scene.add (light);
 
-          light = new THREE.SpotLight (0xffffff);
+          light = new THREE.SpotLight (0xffffaa);
           //light.position.set (10 ,30 ,20);
           light.position.set (100 ,200 ,300);
-          light.target.position.set (0, 0, 0);
+          light.target.position.set (0, 50, 0);
           if (true) {
             light.itensity = 0.5;
             light.castShadow = true;
@@ -252,7 +252,7 @@
 
           window.addEventListener("resize", onWindowResize, false);
 
-			// model mass = 0.035 or 0.036
+			// model mass = 0.035 kg
 			quadrotor.constructModel(3.36/Math.sqrt(2), 4.32/Math.sqrt(2), 0.5,
 			/*	[0.1, 0.1, 0.1, 0.1,
 				 0.1, 0.1, 0.1, 0.1,
