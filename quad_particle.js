@@ -1,11 +1,11 @@
 /*
-**	Parameter Setting For quadrotor by real test
-	Mass: kg  --- 25g + 10.4g						1e-3
-	Distance: mm  --- par[2]<--86.5-->par[6]		1e-3
-	Velocity: mm\s									1e-3
-	Accelerate: mm\(s^2)							1e-3
+**	Parameter Setting For quadrotor by real test:
+	Mass: kg  --- 0.035kg							1e0
+	Distance: cm  --- par[2]<--86.5-->par[6]		1e-2
+	Velocity: cm\s									1e-2
+	Accelerate: m\(s^2)								1e0
 	Angle/Rad: 0 -- 3.14							1e0
-	Force: N --- 1N = 10* 100g						1e0
+	Force: N --- 1N = 10* 0.1kg						1e0
 **	
 
 **	Quadrotor Particle Model
@@ -25,35 +25,32 @@
 **
 
 **	length:
-	1 -- 16 : len = outerlen * Math.sqrt(2)		-- 43.2 mm -- 4.32cm(1e-2)
-	0 -- 16 : len = innerlen * Math.sqrt(2)		-- 33.6 mm -- 3.36cm(1e-2)
-	16 -- 17: len = height						--            0.5cm(1e-2)
+	1 -- 16 : modelOuterLen = outerlen		-- 43.2 mm -- 4.32cm(1e-2)
+	0 -- 16 : modelInnerLen = innerlen		-- 33.6 mm -- 3.36cm(1e-2)
+	16 -- 17: len = height					--            0.5cm(1e-2)
 **	
 
 **	Mass:
 	0\4\8\12  (35/4)g
 **
 
-**	pin --> n --> F
+**	Origin Force Apply:
+	pin --> n --> F
 	1. force up
 		131219 * pin - 802520 =  (n*6.2832)^3 / 2000
 		F(up) = 2.2407e-10 * n^2 - 2.5540e-3
 	2. force spin
 		131219 * pin - 802520 =  (n*6.2832)^3 / 2000
 		F(sp) = (1.3214e-12 * n^2 - 8.9615e-6) / 43.15e-3
+	
+	get ForceVec3.
 **
 
-
-error 1: rotors on quadrotor not in Z+ direction
-	force: as the direction (Vec3)
-	torque:
-		1) along body: 
-		2) 
-
-
-
-
-
+**	force apply with Incline rotor:
+	rotorQuat[0--3]: rotor deviations
+	
+	ForceVec3 = rotorQuat[i].vmult( ForceVec3 );
+**
 */
 
 	quadrotor_ParticleModel = function(){
@@ -65,6 +62,9 @@ error 1: rotors on quadrotor not in Z+ direction
 		var modelMaterial = new THREE.MeshLambertMaterial( {color:0x0} );	// THREE - Material
 		var modelInnerLen = 0;
 		var modelOuterLen = 0;
+		
+		var rotorQuat = [];					// CANNON.Quaternion  : 
+		var massCenter = new CANNON.Vec3(0,0,10);
 		
 		// get all particles condition, particle index as graph about
 		// return: particles = CANNON.Particle[18]
@@ -94,6 +94,16 @@ error 1: rotors on quadrotor not in Z+ direction
 		// Get center point
 		// return: CANNON.Vec3
 		this.getModelPosition = function (){
+			modelPosition = new CANNON.Vec3(0,0,0);
+			// 0,1, 4,5, 8,9, 12,13, 16
+			for (var i=0; i<particles.length-2; i++){
+				if (i%4 == 0 || i%4 == 1){
+					modelPosition.vadd(particles[i].position);
+				}
+			}
+			modelPosition.x /= 9;
+			modelPosition.y /= 9;
+			modelPosition.z /= 9;
 			return modelPosition;
 		}
 		
@@ -136,18 +146,47 @@ error 1: rotors on quadrotor not in Z+ direction
 			newBallSMesh.castShadow = true;
 			newBallSMesh.receiveShadow = true;
 			newBallSMesh.useQuaternion = true;
+			particleMeshes[particleMeshes.length] = newBallSMesh;
 			scene.add(newBallSMesh);
+		}
+		
+		// remove point
+		this.RemoveOnePointMass = function (world, scene){	
+			// CANNON side
+			// particle
+			world.remove(particles[particles.length-1]);
+			particles.splice(particles.length-1,1)
 			
+			// constraint
+			var counter = particleConstraint.length-1;
+			for (var i=0; i<particles.length; i++){
+				world.removeConstraint(particleConstraint[counter]);
+				particleConstraint.splice(counter,1);
+				counter--;
+			}
+			
+			// THREE side
+			counter = particleMeshes.length-1;
+			scene.remove(particleMeshes[counter]);
+			particleMeshes.splice(counter,1);
 		}
 			
 		// Set all particles' velocity 
-		// setVelocityArray :CANNON.Vec3[18]
+		// setVelocityArray : CANNON.Vec3[18]
 		this.setModelVelocity = function (setVelocityArray){
 			for (var i=0; i<particles.length; i++){
 				particles[i].velocity.set(setVelocityArray[i].x, setVelocityArray[i].y, setVelocityArray[i].z);
 			}
 		} 
 			
+		// Set Rotors' direction
+		// directionArray : CANNON.Vec3[4]
+		this.setRotorDirection = function (directionArray){
+			normZ = new CANNON.Vec3(0,0,1);
+			for (var i=0; i<4; i++){
+				 rotorQuat[i].setFromVectors( normZ, directionArray[i] );
+			}
+		}
 		
 		// Set force by setting pin of four rotor, translate:
 		// pinsArr: int[4] or float[4]
@@ -157,27 +196,35 @@ error 1: rotors on quadrotor not in Z+ direction
 			pinsArr[2] = pinsArr[1];
 			pinsArr[1] = temp;
 			
-			//console.log(pinsArr);
+			console.log(pinsArr);
 		
-			var direction = [1,1, -1,-1, 1,-1, -1,1];
+			var direction = [1,1, -1,-1, 1,-1, -1,1];	//side force direction
 			var forceArr = new Array();
 			var rad, force_up, force_side;
+			var distance;
+			getMassCenter();
 			
 			for (var i=0; i<4; i++){
+				distance = distofVec3(particles[i*4+1].position , massCenter);
 				rad = Math.pow( (131219 * pinsArr[i] - 802520)*2, 1/3 ) * 62.832;
+				
+				// calc UP direction force
 				force_up = 2.2407e-10 * rad*rad - 2.5540e-3;
-				force_side = (1.3214e-12 * rad*rad - 8.9615e-6) / 43.15e-3 / Math.sqrt(2);
-				forceArr[i] = new CANNON.Vec3(force_side * direction[2*i],  
-											force_side * direction[2*i+1],
+				// calc SIDE direction force
+				force_side = (1.3214e-12 * rad*rad - 8.9615e-6) / distance / Math.sqrt(2) / 1e-2;
+				forceArr[i] = new CANNON.Vec3(0,//force_side * direction[2*i],  
+											0,//force_side * direction[2*i+1],
 											force_up);
-				//console.log('force_side ' +(i+1)+" = " +force_side);
+											
+				// quaternion to simulate rotor direction
+				forceArr[i] = rotorQuat[i].vmult(forceArr[i]);
 			}
 			setModelForce_norm(forceArr);
 		}
 		
 		// Set 4 point Vertical force ----->follow by pins
 		// setForceArray: CANNON.Vec3[4]      -->   arr[1,5,9,13]
-		setModelForce_norm = function (setForceArray){
+		function setModelForce_norm(setForceArray){
 			var deflexion = new CANNON.Quaternion();
 			var originPos = new CANNON.Vec3(0,0,1);
 			var nowPos = new CANNON.Vec3(particles[16].position.x - particles[17].position.x,
@@ -186,23 +233,40 @@ error 1: rotors on quadrotor not in Z+ direction
 			deflexion.setFromVectors(originPos, nowPos);
 			for (var i=0; i<4; i++){
 				setForceArray[i] = deflexion.vmult(setForceArray[i]);
+				//console.log(setForceArray[i]);
 			}
 			for (var i=0; i<4; i++){
 				particles[i*4+1].force.set(setForceArray[i].x, setForceArray[i].y, setForceArray[i].z);
 			}
 			//console.log(particles[0].position);
-		}
-	
-		
-		// add AxisZ turn force, to simulate spinning witn unbalance
-		// forceArr: CANNON.Vec3[4]      -->   arr[1,5,9,13]
+		}		
 			
+		// calc mass center
+		function getMassCenter(){
+			var centerX = 0, centerY = 0, centerZ = 0, massSum = 0;
+			for (var i=0; i<particles.length; i++){
+				centerX += particles[i].position.x * particles[i].mass;
+				centerY += particles[i].position.y * particles[i].mass;
+				centerZ += particles[i].position.z * particles[i].mass;
+				massSum += particles[i].mass;
+			}
+			massCenter.x = centerX/massSum;
+			massCenter.y = centerY/massSum;
+			massCenter.z = centerZ/massSum;
+		}
+		
+		
 		// Contruct the origin model
 		// innerLen, outerLen, height: float
 		// particalMass: float[18] -- index as graph
 		this.constructModel = function (innerLen, outerLen, height, particalMass){
-			modelInnerLen = innerLen* Math.sqrt(2);
-			modelOuterLen = outerLen* Math.sqrt(2);
+			modelInnerLen = innerLen;
+			modelOuterLen = outerLen;
+			innerLen = innerLen / Math.sqrt(2);
+			outerLen = outerLen / Math.sqrt(2);
+			for (var i=0; i<4; i++)
+				rotorQuat[i] = new CANNON.Quaternion();
+				
 			// construct all point
 			constructModelPoint(innerLen, outerLen, height, particalMass);
 			// make all particles' constraints
@@ -338,18 +402,25 @@ error 1: rotors on quadrotor not in Z+ direction
 			var counter = 0;
 			for ( var i = 0 ; i < particles.length - 1; i ++ ) {
 				for ( var j = i + 1 ; j < particles.length; j ++ ) {
-					particleConstraint[counter] = (new CANNON.DistanceConstraint( particles[i], particles[j], distof (particles[i], particles[j]) , 1e9) );
+					particleConstraint[counter] = (new CANNON.DistanceConstraint( particles[i], particles[j], distofParticle (particles[i], particles[j]) , 1e9) );
 					counter++;
 				}
 			}
 		}
         
-		function distof (a,b) {
+		function distofParticle (a,b) {
 			return  Math.sqrt (
                 (a.position.x - b.position.x) * (a.position.x - b.position.x) + 
                 (a.position.y - b.position.y) * (a.position.y - b.position.y) + 
                 (a.position.z - b.position.z) * (a.position.z - b.position.z) );
-        }		
+        }
+		
+		function distofVec3	(a,b){
+			return  Math.sqrt (
+                (a.x - b.x) * (a.x - b.x) + 
+                (a.y - b.y) * (a.y - b.y) + 
+                (a.z - b.z) * (a.z - b.z) );
+        }
 	}	 
 	 
 	 

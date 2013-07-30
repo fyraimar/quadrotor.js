@@ -9,6 +9,7 @@
     <script src="js/PointerLockControls.js"></script>
 	<script src="quad_particle.js"></script>
 	<script src="control.js"></script>
+	<script src="noise.js"></script>
     <style>
       html, body {
         width: 100%;
@@ -66,7 +67,7 @@
     </div>
 
     <script>
-      var sphereShape, sphereBody, world, physicsMaterial, walls=[], balls=[], nallMeshes=[];
+      var sphereShape, sphereBody, world, physicsMaterial;
 
       var camera, scene, renderer;
       var geometry, material, mesh;
@@ -80,6 +81,7 @@
 	  //-------------- Model ---------------
 	  var quadrotor = new quadrotor_ParticleModel();
 	  var PIDcontrol = new controller(quadrotor.getAllParticles, quadrotor.setModelPin);
+	  var noise = new Noise(quadrotor);
 
       if ( havePointerLock ) {
         var element = document.body;
@@ -165,7 +167,7 @@
           var physicsContactMaterial = new CANNON.ContactMaterial( physicsMaterial, physicsMaterial, 0.9, 0.3 );
           world.addContactMaterial(physicsContactMaterial);
 
-          var mass = 1000, radius = 1;//We shouldn't affect the world.
+          var mass = 1, radius = 1;//We shouldn't affect the world.
           sphereShape = new CANNON.Sphere(radius);
           sphereBody = new CANNON.RigidBody (mass, sphereShape, physicsMaterial);
           sphereBody.position.set(0,-20,1);
@@ -252,20 +254,19 @@
 
           window.addEventListener("resize", onWindowResize, false);
 
-			// model mass = 0.035 kg
-			quadrotor.constructModel(3.36/Math.sqrt(2), 4.32/Math.sqrt(2), 0.5,
-			/*	[0.1, 0.1, 0.1, 0.1,
-				 0.1, 0.1, 0.1, 0.1,
-				 0.1, 0.1, 0.1, 0.1,
-				 0.1, 0.1, 0.1, 0.1,
-				 8.2, 8.2]);*/
+			// init quadrotor:
+			// inner 3.36cm / outer 4.32cm
+			quadrotor.constructModel(3.36, 4.32, 0.5,
 				[0.0047, 0.00001, 0.00401, 0.00001,
 				0.0047, 0.00001, 0.00401, 0.00001,
 				0.0047, 0.00001, 0.00401, 0.00001,
 				0.0047, 0.00001, 0.00401, 0.00001,
 				 0.00004, 0.00004]);
 			quadrotor.showModel(world, scene);
+			
+			// PIDcontrol setup
 			PIDcontrol.setup();
+			noise.setup();
         }
 
         function onWindowResize () {
@@ -281,13 +282,10 @@
           if (controls.enabled) {
             world.step (dt);
 
-			PIDcontrol.loop();		
+			// update function
+			PIDcontrol.loop();
+			noise.loop();			
 			quadrotor.updateAnimate();
-            
-            for (var i=0; i<balls.length; i ++) {
-              balls[i].position.copy (ballMeshes[i].position);
-              balls[i].quaternion.copy(ballMeshes[i].quaternion);
-            }
           }
           controls.update (Date.now() - time);
           renderer.render (scene, camera);

@@ -20,7 +20,7 @@ function getThetaXYZ ( points ) {
     var base = [[1,0,0],[0,1,0],[0,0,1]];
     var curBase = genBase (points);
     var thetaY = Math.asin( - curBase[2][0]);
-    var thetaZ = Math.asin( curBase[1][0] / (Math.cos(thetaY)) );
+    var thetaZ = Math.asin( -curBase[1][0] / (Math.cos(thetaY)) );
 	
     var thetaX = Math.asin( curBase[2][1] / (Math.cos(thetaY)) );
 	//thetaY = Math.asin( curBase[2][0] );
@@ -173,25 +173,51 @@ function controller (getAllParticles, setPin) { //输出控制函数
         this.K1 = 0.00000000022407;
         console.log(getAllParticles());
     }
-
+	
+	// var minE = -12;
+	// var maxE = 0;
+	// function getE(num){
+		// var str = num.toString().split('e');
+		// if (str[1] >0)
+			// return str[1];
+		// else
+			// return str[1] - 5;
+	// }
+	
     this.loop = function () {
+		this.tempCounter ++;
+        console.log(this.tempCounter+":");
+		
         this.fi = 0.0000875 * this.ai - 0.026 * this.Si;
 
         this.A = (this.fi + 0.35) / this.K1;
         this.B = Math.sqrt(2) * (-0.025 * this.thetaXi + 0.02 * this.thetaXj) / (0.0432 * this.K2);
         this.C = Math.sqrt(2) * (-0.025 * this.thetaYi + 0.02 * this.thetaYj) / (0.0432 * this.K1);
         this.D = (-0.25 * this.thetaZi + 0.2 * this.thetaZj) / this.K2;
-
+		
+		// if (minE > getE(this.fi))
+			// minE = getE(this.fi);
+		// if (minE > getE((-0.025 * this.thetaXi + 0.02 * this.thetaXj)))
+			// minE = getE((-0.025 * this.thetaXi + 0.02 * this.thetaXj));
+		// if (minE > getE((-0.025 * this.thetaYi + 0.02 * this.thetaYj)))
+			// minE = getE((-0.025 * this.thetaYi + 0.02 * this.thetaYj));
+		// if (minE > getE((-0.25 * this.thetaZi + 0.2 * this.thetaZj)))
+			// minE = getE((-0.25 * this.thetaZi + 0.2 * this.thetaZj));
+		// if (minE > getE(this.fi))
+			// minE = getE(this.fi);
+		
+		// console.log("min = " + minE);
+		
         this.pin1 = this.T1 * 1/8 * (this.A + this.B + this.C - this.D) * Math.sqrt(this.A + this.B + this.C - this.D);
         this.pin2 = this.T2 * 1/8 * (this.A - this.B + this.C + this.D) * Math.sqrt(this.A - this.B + this.C + this.D); 
         this.pin3 = this.T3 * 1/8 * (this.A + this.B + this.C - this.D) * Math.sqrt(this.A + this.B + this.C - this.D); 
         this.pin4 = this.T4 * 1/8 * (this.A + this.B - this.C + this.D) * Math.sqrt(this.A + this.B - this.C + this.D);
         if ( this.tempCounter > 5 ) {
             setPin ([
-                    this.pin1,
-                    this.pin2,
-                    this.pin3,
-                    this.pin4
+                    this.pin1 & 0xff,
+                    this.pin2 & 0xff,
+                    this.pin3 & 0xff,
+                    this.pin4 & 0xff
                     ]);
         } else {
             setPin ([ 
@@ -201,10 +227,8 @@ function controller (getAllParticles, setPin) { //输出控制函数
                     130
                     ]);
         }
-        this.tempCounter ++;
-        console.log(this.tempCounter+":");
         //console.log(this);
-		console.log( "" 
+		/*console.log( "" 
                 + "si-1:" + 
                 this. Sj 
                 + "\n"  
@@ -285,8 +309,8 @@ function controller (getAllParticles, setPin) { //输出控制函数
 				" \n" + 
 				" particles data: " +
 				getAllParticles()[16].velocity
-                )        ;
-				
+                ); */
+			
 		//sleep(1000);
 				
         this.aj = this.ai;
