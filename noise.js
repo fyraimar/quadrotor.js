@@ -1,10 +1,10 @@
 // noise Adding
 
-function Noise(quadrotor){
-	this.addMassNoise = quadrotor.AddOnePointMass;
-	this.removeMassNoise = quadrotor.RemoveOnePointMass;
-	this.setRotorDirection = quadrotor.setRotorDirection;
-	this.changePin = quadrotor.setModelPin;
+function Noise(quadrotor, world , scene){
+	var addMassNoise = quadrotor.AddOnePointMass;
+	var removeMassNoise = quadrotor.RemoveOnePointMass;
+	var setRotorDirection = quadrotor.setRotorDirection;
+	var changePin = quadrotor.setModelPin;
 	
 	var ifaddMassNoise = false;
 	var ifremoveMassNoise = false;
@@ -24,13 +24,13 @@ function Noise(quadrotor){
 	this.loop = function(){
 		// add Mass and use only ONCE
 		if (ifaddMassNoise == true && isAdded == false){
-			
+			addMassNoise(new CANNON.Vec3(0.3,0,0), 0.02, world , scene)
 			ifaddMassNoise = false;
 			isAdded = true;
 		}
 		// remove Mass only ONCE when added
 		if (ifremoveMassNoise == true && isAdded == true){
-			
+			removeMassNoise(world , scene);
 			ifremoveMassNoise = false;
 			isAdded = false;
 		}
@@ -44,16 +44,16 @@ function Noise(quadrotor){
 		if (ifchangePin == true){
 			switch (inputNum){
 				case 1:
-					this.changePin([50,130,130,130]);
+					changePin([130,130,130,70]);
 					break;
 				case 2:
-					this.changePin([180,130,130,130]);
+					changePin([180,130,130,130]);
 					break;
 				case 3:
-					this.changePin([180,80,180,80]);
+					changePin([180,80,180,80]);
 					break;
 				case 4:
-					this.changePin([80,180,80,180]);
+					changePin([80,180,80,180]);
 					break;
 			}
 			ifchangePin = false;
@@ -80,8 +80,10 @@ function Noise(quadrotor){
 				inputNum = 4;
 				break;
 			case 53:// 5
+				ifaddMassNoise = true;
 				break;
 			case 54:// 6
+				ifremoveMassNoise = true;
 				break;
 			case 55:// 7
 				break;

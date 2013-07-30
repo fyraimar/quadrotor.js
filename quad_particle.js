@@ -128,16 +128,20 @@
 			// CANNON side
 			// particle
 			var newParticle = new CANNON.Particle(pointMass);
-			newParticle.position.copy(pointPosition);
+			newParticle.position.set(particles[16].position.x + pointPosition.x, 
+									particles[16].position.y + pointPosition.y, 
+									particles[16].position.z + pointPosition.z );
 			world.add(newParticle);
+			particles.push(newParticle);
 			
 			// constraint
 			var counter = particleConstraint.length;
-			for (var i=0; i<particles.length; i++){
-				particleConstraint[counter] = (new CANNON.DistanceConstraint( particles[i], newParticle, distof (particles[i], newParticle) , 1e9) );
+			for (var i=0; i<particles.length-1; i++){
+				particleConstraint[counter] = (new CANNON.DistanceConstraint( particles[i], newParticle, distofParticle (particles[i], newParticle) , 1e9) );
 				world.addConstraint(particleConstraint[counter]);
 				counter++;
 			}
+			
 			
 			// THREE side
 			var newBallShape = new THREE.SphereGeometry(0.1);
@@ -146,17 +150,14 @@
 			newBallSMesh.castShadow = true;
 			newBallSMesh.receiveShadow = true;
 			newBallSMesh.useQuaternion = true;
-			particleMeshes[particleMeshes.length] = newBallSMesh;
+			particleMeshes.push(newBallSMesh);
 			scene.add(newBallSMesh);
 		}
 		
 		// remove point
 		this.RemoveOnePointMass = function (world, scene){	
+			particles[particles.length-1].mass = 0;
 			// CANNON side
-			// particle
-			world.remove(particles[particles.length-1]);
-			particles.splice(particles.length-1,1)
-			
 			// constraint
 			var counter = particleConstraint.length-1;
 			for (var i=0; i<particles.length; i++){
@@ -164,11 +165,18 @@
 				particleConstraint.splice(counter,1);
 				counter--;
 			}
+			console.log("1 "+ particleConstraint.length);
 			
+			// particle
+			//world.remove(particles[particles.length-1]);
+			particles.splice(particles.length-1,1)
+			console.log("1 "+ particles.length);
 			// THREE side
+			
 			counter = particleMeshes.length-1;
 			scene.remove(particleMeshes[counter]);
 			particleMeshes.splice(counter,1);
+			console.log("1");
 		}
 			
 		// Set all particles' velocity 
@@ -218,6 +226,7 @@
 											
 				// quaternion to simulate rotor direction
 				forceArr[i] = rotorQuat[i].vmult(forceArr[i]);
+				//console.log(distance);
 			}
 			setModelForce_norm(forceArr);
 		}
@@ -253,6 +262,7 @@
 			massCenter.x = centerX/massSum;
 			massCenter.y = centerY/massSum;
 			massCenter.z = centerZ/massSum;
+			//console.log(massSum);
 		}
 		
 		

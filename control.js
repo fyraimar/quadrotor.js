@@ -20,7 +20,7 @@ function getThetaXYZ ( points ) {
     var base = [[1,0,0],[0,1,0],[0,0,1]];
     var curBase = genBase (points);
     var thetaY = Math.asin( - curBase[2][0]);
-    var thetaZ = Math.asin( -curBase[1][0] / (Math.cos(thetaY)) );
+    var thetaZ = Math.asin( curBase[1][0] / (Math.cos(thetaY)) );
 	
     var thetaX = Math.asin( curBase[2][1] / (Math.cos(thetaY)) );
 	//thetaY = Math.asin( curBase[2][0] );
@@ -214,10 +214,10 @@ function controller (getAllParticles, setPin) { //Êä³ö¿ØÖÆº¯Êý
         this.pin4 = this.T4 * 1/8 * (this.A + this.B - this.C + this.D) * Math.sqrt(this.A + this.B - this.C + this.D);
         if ( this.tempCounter > 5 ) {
             setPin ([
-                    this.pin1 & 0xff,
-                    this.pin2 & 0xff,
-                    this.pin3 & 0xff,
-                    this.pin4 & 0xff
+                    (this.pin1 > 255)? 255: (this.pin1 &0xff),
+                    (this.pin2 > 255)? 255: (this.pin2 &0xff),
+                    (this.pin3 > 255)? 255: (this.pin3 &0xff),
+                    (this.pin4 > 255)? 255: (this.pin4 &0xff)
                     ]);
         } else {
             setPin ([ 
