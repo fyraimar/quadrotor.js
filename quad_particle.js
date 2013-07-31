@@ -191,8 +191,12 @@
 		// directionArray : CANNON.Vec3[4]
 		this.setRotorDirection = function (directionArray){
 			normZ = new CANNON.Vec3(0,0,1);
+			zero = new CANNON.Vec3(0,0,0);
 			for (var i=0; i<4; i++){
-				 rotorQuat[i].setFromVectors( normZ, directionArray[i] );
+				if (directionArray[i] == zero)
+					rotorQuat[i] = new CANNON.Quaternion();
+				else
+					rotorQuat[i].setFromVectors( normZ, directionArray[i] );
 			}
 		}
 		
