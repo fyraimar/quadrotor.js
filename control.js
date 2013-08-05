@@ -227,6 +227,7 @@ function controller (getAllParticles, setPin) { //Êä³ö¿ØÖÆº¯Êý
                     130
                     ]);
         }
+		//console.log(this.pin1 / this.T1 + ", "+this.ai);
         //console.log(this);
 		/*console.log( "" 
                 + "si-1:" + 

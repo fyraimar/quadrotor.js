@@ -24,7 +24,7 @@ function Noise(quadrotor, world , scene){
 	this.loop = function(){
 		// add Mass and use only ONCE
 		if (ifaddMassNoise == true && isAdded == false){
-			addMassNoise(new CANNON.Vec3(0.3,0,0), 0.02, world , scene)
+			addMassNoise(new CANNON.Vec3(0,0.3,0), 0.02, world , scene)
 			ifaddMassNoise = false;
 			isAdded = true;
 		}
