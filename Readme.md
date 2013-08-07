@@ -8,7 +8,7 @@
 对应实际四轴飞行器的物理形态，飞行器以X字形布局，下图是从Z轴正方向看的俯视图：
 
     (1)                        (0)
-    <Ac  9                  1 Cw>
+    Cw>  9                  1 <Ac
         11 \  8        0  / 3
     	     10 \ 	 / 2
 			      16 		    		|
@@ -16,7 +16,7 @@
 			    / 	 \		    		|
 		      4       12		    	|
 	     5 /  6       14 \ 13	    	X轴
-    <Cw  7                 15  Ac>
+    Ac>  7                 15  <Cw
     (2)						   (3)
 
 1. 括号内为电机序号，以(X-, Y+)开始第一个，依次逆时针
@@ -75,19 +75,22 @@
 ##算法控制、噪声添加的使用
 
 ###算法控制 control.js
-控制部分程序结构模拟arduino，算法初始化部分使用 setup()，循环部分使用 loop()。
-	
-	function controller(getAllParticles, setPin){
+这部分是用于测试控制算法的，控制部分程序结构模拟arduino，算法初始化部分使用 setup()，循环部分使用 loop()。
+
+	function controller(getAllParticles, parameter, setPin){
 		this.setup = function(){
+			// 可添加算法初始化设置
 			...
 		};
 		this.loop = function(){
+			// 实现算法调整、输出电机值(setPin)
 			...
 		};
 	}
 	
-1. 传入函数 getAllParticles：返回模型中18个点的信息，类型为 CANNON.Particle[18]；
-2. 传入函数 setPin：每一次在loop()中设置的电机油门值。
+a. 传入函数 getAllParticles：返回模型中18个点的信息，类型为 CANNON.Particle[18]；
+b. 传入结构 parameter：可以使用并获取对应参数。
+c. 传入函数 setPin：每一次在loop()中设置的电机油门值。
 
 -----------
 ####使用：
@@ -97,6 +100,7 @@
 本程序中使用 getThetaXYZ 获得飞行器 X,Y,Z 的偏转角 thetaX,thetaY,thetaZ，使用 getA 获得飞行器 Z轴方向上的加速度 a。
 
 通过loop()内的循环运算，根据现有的几个参数确定 setPin() 的数值。
+
 	
 -----------
 ###噪声添加 noise.js
@@ -109,14 +113,17 @@
 		var changePin = quadrotor.setModelPin;
 		
 		this.setup = function(){
+			// 可添加初始噪声设置
 			...
 		};
 		this.loop = function(){
+			// 可添加运行中噪声设置、按键判断后的噪声实现
 			...
 		};
 		var onKeyDown = function( event ){
 			switch( event.keyCode ) {
 				case 49:
+					// 添加按键判断部分
 					...
 					break;
 			}
@@ -140,7 +147,7 @@
         
 	setRotorDirection(directionArray);
 		//修改电机的偏差方向
-	    directionArray: CANNON.Vec3()[4]，分别对应电机0,1,2,3的电机方向，
+	    directionArray: CANNON.Vec3()[4]，分别对应电机0,1,2,3的电机方向
     
 	changePin([a, b, c, d]);
 		//修改电机输出值

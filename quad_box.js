@@ -215,7 +215,7 @@
 			pinsArr[2] = pinsArr[1];
 			pinsArr[1] = temp;
 			
-			//console.log(pinsArr);
+			console.log(pinsArr);
 		
 			var direction = [-1,-1, 1,1, -1,1, 1,-1];	//side force direction
 			var forceArr = new Array();
@@ -464,22 +464,22 @@
 			sideMesh2.quaternion.set(q.x,q.y,q.z,q.w);
 			sideMesh2.useQuaternion = true;
 				
-			var edgeMeshGeo = new THREE.CubeGeometry(0.6,0.6,0.6);
+			var edgeMeshGeo = new THREE.CubeGeometry(0.6,0.6,0.9);
 			var edgeMesh = new THREE.Mesh( edgeMeshGeo, material );
 				
 			THREE.GeometryUtils.merge(boxGeometry , sideMesh1);
 			THREE.GeometryUtils.merge(boxGeometry , sideMesh2);
-			edgeMesh.position.set(1.5,1.5,0);
+			edgeMesh.position.set(1.5,1.5,0.15);
 			THREE.GeometryUtils.merge(boxGeometry , edgeMesh);
-			edgeMesh.position.set(-1.5,1.5,0);
+			edgeMesh.position.set(-1.5,1.5,0.15);
 			THREE.GeometryUtils.merge(boxGeometry , edgeMesh);
-			edgeMesh.position.set(1.5,-1.5,0);
+			edgeMesh.position.set(1.5,-1.5,0.15);
 			THREE.GeometryUtils.merge(boxGeometry , edgeMesh);
-			edgeMesh.position.set(-1.5,-1.5,0);
+			edgeMesh.position.set(-1.5,-1.5,0.15);
 			THREE.GeometryUtils.merge(boxGeometry , edgeMesh);
 			
 			mainMesh = new THREE.Mesh( boxGeometry, material );
-			mainMesh.position.set(modelPosition.x, modelPosition.y, modelPosition.z);
+			mainMesh.position.set(modelPosition.x, modelPosition.y, modelPosition.z+ height/2);
 			mainMesh.useQuaternion = true;
 				
 			scene.add(mainMesh);

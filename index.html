@@ -4,12 +4,6 @@
   <head>
     <meta charset="utf-8">
     <style> * {margin:0;padding:0}</style>
-    <script src="build/cannon.js"></script>
-    <script src="libs/Three.js"></script>
-    <script src="js/PointerLockControls.js"></script>
-	<script src="quad_box.js"></script>
-	<script src="control.js"></script>
-	<script src="noise.js"></script>
     <style>
       html, body {
         width: 100%;
@@ -51,7 +45,7 @@
         -moz-box-align: center;
         -box-align: center;
 
-        color: #ffffff;
+        color: #000000;
         text-align: center;
 
         cursor: pointer;
@@ -59,13 +53,22 @@
     </style>
   </head>
   <body>
-    <div id="blocker">
-      <div id="instructions">
-        <span style="font-size:40px"> Click to play </span>
-        <p> (W,A,S,D = Move, Space = Jump. Mouse = Look, Click = Shoot) </p>
-      </div>
-    </div>
-
-    <script src="world.js"></script>
+	<script src="js/cannon.js"></script>
+    <script src="js/Three.js"></script>
+    <script src="js/PointerLockControls.js"></script>
+	<script src="quad_box.js"></script>
+	<script src="parameter.js"></script>
+	<script src="control.js"></script>
+	<script src="noise.js"></script>
+	
+	<div id="blocker">
+		<div id="instructions">
+		<span style="font-size:40px">Click to play</span>
+		<br />
+		(W,A,S,D = Move, SPACE = Jump, MOUSE = Look, CLICK = Shoot)
+		</div>
+	</div>
+	<script src="config.js" ></script>
+    <script src="world.js" ></script>
     </body>
   </html>

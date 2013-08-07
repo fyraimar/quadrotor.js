@@ -66,6 +66,7 @@ var sphereShape, sphereBody, world, physicsMaterial;
 
 	  //-------------- Model ---------------
 	  var quadrotor;
+	  var parameter;
 	  var PIDcontrol;
 	  var noise;
 	  
@@ -114,7 +115,7 @@ var sphereShape, sphereBody, world, physicsMaterial;
       function init() {
           camera = new THREE.PerspectiveCamera (75, window.Width / window.innerHeight, 0.1, 1000);
 		camera.up.set(0,0,1);
-		camera.lookAt( new THREE.Vector3( 0, 1, 0 ) );
+		camera.lookAt( new THREE.Vector3( 0, 1, 0 ) );		// look at Y+
 		
           scene = new THREE.Scene();
           scene.fog = new THREE.Fog (0xbbbbbb, 0, 500);
@@ -123,6 +124,13 @@ var sphereShape, sphereBody, world, physicsMaterial;
 
           scene.add (ambient);
           
+		  renderer = new THREE.WebGLRenderer();
+          renderer.shadowMapEnabled = true;
+          renderer.shadowMapSoft = true;
+          renderer.setSize ( window.innerWidth, window.innerHeight );
+          renderer.setClearColor (scene.fog.color, 1);
+          document.body.appendChild (renderer.domElement);
+          window.addEventListener("resize", onWindowResize, false);
           
           light = new THREE.SpotLight (0xffaaff);
           //light.position.set (10 ,30 ,20);
@@ -174,21 +182,11 @@ var sphereShape, sphereBody, world, physicsMaterial;
           mesh.castShadow = true;
           mesh.receiveShadow = true;
           scene.add ( mesh );
-
-          renderer = new THREE.WebGLRenderer();
-          renderer.shadowMapEnabled = true;
-          renderer.shadowMapSoft = true;
-          renderer.setSize ( window.innerWidth, window.innerHeight );
-          renderer.setClearColor (scene.fog.color, 1);
-
-          document.body.appendChild (renderer.domElement);
-
-          window.addEventListener("resize", onWindowResize, false);
-
 		  
-		  // init all
+		    // init all
 		quadrotor = new quadrotor_ParticleModel();
-		PIDcontrol = new controller(quadrotor.getAllParticles, quadrotor.setModelPin);
+		parameter = new parameter_func(world.gravity);
+		PIDcontrol = new controller(quadrotor.getAllParticles, parameter, quadrotor.setModelPin);
 		noise = new Noise(quadrotor, world, scene);
 		  
 		  
@@ -205,6 +203,7 @@ var sphereShape, sphereBody, world, physicsMaterial;
 			// PIDcontrol setup
 			PIDcontrol.setup();
 			noise.setup();
+			onWindowResize();
         }
 
         function onWindowResize () {
@@ -213,7 +212,8 @@ var sphereShape, sphereBody, world, physicsMaterial;
           renderer.setSize ( window.innerWidth, window.innerHeight);
         }
 
-        var dt = 1/200;
+        var dt = 1/200;			//for this pid
+        //var dt = 1/60;		//normal
 		var counter = 0;
         function animate() {
           requestAnimationFrame( animate );
@@ -222,7 +222,8 @@ var sphereShape, sphereBody, world, physicsMaterial;
 
 			// update function
 			PIDcontrol.loop();
-			noise.loop();			
+			noise.loop();		
+			parameter.getForceAndMass(quadrotor.getAllParticles());
 			quadrotor.updateAnimate();
           }
           controls.update (Date.now() - time);
